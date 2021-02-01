@@ -73,10 +73,19 @@ class StereoImagePublisher(Node):
         self.left_image_and_info = self._create_image_and_info_messages(left_image)
         self.right_image_and_info = self._create_image_and_info_messages(right_image)
 
-        self.left_image_pub = self.create_publisher(Image, 'left/image_rect', 1)
-        self.left_camera_info_pub = self.create_publisher(CameraInfo, 'left/camera_info', 1)
-        self.right_image_pub = self.create_publisher(Image, 'right/image_rect', 1)
-        self.right_camera_info_pub = self.create_publisher(CameraInfo, 'right/camera_info', 1)
+        qos_info = rclpy.qos.QoSProfile(
+          depth=1,
+          durability=rclpy.qos.QoSDurabilityPolicy.TRANSIENT_LOCAL,
+          reliability=rclpy.qos.QoSReliabilityPolicy.RELIABLE)
+
+        self.left_image_pub = self.create_publisher(Image, 'left/image_rect',
+                                                    rclpy.qos.qos_profile_sensor_data)
+        self.left_camera_info_pub = self.create_publisher(CameraInfo, 'left/camera_info',
+                                                          qos_info)
+        self.right_image_pub = self.create_publisher(Image, 'right/image_rect',
+                                                     rclpy.qos.qos_profile_sensor_data)
+        self.right_camera_info_pub = self.create_publisher(CameraInfo, 'right/camera_info',
+                                                           qos_info)
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
     def _create_image_and_info_messages(self, image):

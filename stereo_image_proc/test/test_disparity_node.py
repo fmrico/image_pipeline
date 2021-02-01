@@ -98,7 +98,7 @@ class TestDisparityNode(unittest.TestCase):
             DisparityImage,
             'disparity',
             lambda msg: msgs_received.append(msg),
-            1
+            rclpy.qos.qos_profile_sensor_data
         )
 
         # Wait up to 60 seconds to receive message

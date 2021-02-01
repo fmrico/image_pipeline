@@ -265,7 +265,8 @@ DisparityNode::DisparityNode(const rclcpp::NodeOptions & options)
   this->declare_parameters("", double_params);
   this->declare_parameters("", bool_params);
 
-  pub_disparity_ = create_publisher<stereo_msgs::msg::DisparityImage>("disparity", 1);
+  pub_disparity_ = create_publisher<stereo_msgs::msg::DisparityImage>(
+    "disparity", rclcpp::SensorDataQoS());
 
   // TODO(jacobperron): Replace this with a graph event.
   //                    Only subscribe if there's a subscription listening to our publisher.
@@ -279,14 +280,14 @@ void DisparityNode::connectCb()
   image_transport::TransportHints hints(this, "raw");
   const bool use_system_default_qos = this->get_parameter("use_system_default_qos").as_bool();
   rclcpp::QoS image_sub_qos = rclcpp::SensorDataQoS();
+  rclcpp::QoS info_sub_qos = rclcpp::QoS(100).transient_local();
   if (use_system_default_qos) {
     image_sub_qos = rclcpp::SystemDefaultsQoS();
   }
-  const auto image_sub_rmw_qos = image_sub_qos.get_rmw_qos_profile();
-  sub_l_image_.subscribe(this, "left/image_rect", hints.getTransport(), image_sub_rmw_qos);
-  sub_l_info_.subscribe(this, "left/camera_info", image_sub_rmw_qos);
-  sub_r_image_.subscribe(this, "right/image_rect", hints.getTransport(), image_sub_rmw_qos);
-  sub_r_info_.subscribe(this, "right/camera_info", image_sub_rmw_qos);
+  sub_l_image_.subscribe(this, "left/image_rect", hints.getTransport(), image_sub_qos);
+  sub_l_info_.subscribe(this, "left/camera_info", info_sub_qos);
+  sub_r_image_.subscribe(this, "right/image_rect", hints.getTransport(), image_sub_qos);
+  sub_r_info_.subscribe(this, "right/camera_info", info_sub_qos);
 }
 
 void DisparityNode::imageCb(

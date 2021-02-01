@@ -272,9 +272,6 @@ void ImageRotateNode::subscribe()
 {
   RCUTILS_LOG_DEBUG("Subscribing to image topic.");
   if (config_.use_camera_info && config_.input_frame_id.empty()) {
-    auto custom_qos = rmw_qos_profile_system_default;
-    custom_qos.depth = 3;
-
     cam_sub_ = image_transport::create_camera_subscription(
       this,
       "image",
@@ -282,16 +279,14 @@ void ImageRotateNode::subscribe()
         &ImageRotateNode::imageCallbackWithInfo, this,
         std::placeholders::_1, std::placeholders::_2),
       "raw",
-      custom_qos);
+      rclcpp::SensorDataQoS());
   } else {
-    auto custom_qos = rmw_qos_profile_system_default;
-    custom_qos.depth = 3;
     img_sub_ = image_transport::create_subscription(
       this,
       "image",
       std::bind(&ImageRotateNode::imageCallback, this, std::placeholders::_1),
       "raw",
-      custom_qos);
+      rclcpp::SensorDataQoS());
   }
 }
 

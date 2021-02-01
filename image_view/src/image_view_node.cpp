@@ -110,7 +110,7 @@ ImageViewNode::ImageViewNode(const rclcpp::NodeOptions & options)
     "image", this->get_name(), this->get_namespace());
 
   image_transport::TransportHints hints(this, transport);
-  pub_ = this->create_publisher<sensor_msgs::msg::Image>("output", 1);
+  pub_ = this->create_publisher<sensor_msgs::msg::Image>("output", rclcpp::SensorDataQoS());
   sub_ = image_transport::create_subscription(
     this, topic, std::bind(
       &ImageViewNode::imageCb, this, std::placeholders::_1), hints.getTransport());

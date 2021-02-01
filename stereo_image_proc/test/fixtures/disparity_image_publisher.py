@@ -78,10 +78,19 @@ class DisparityImagePublisher(Node):
         self.disparity_image.image.step = self.disparity_image.image.width
         self.disparity_image.image.data = array.array('B', disparity_image.tobytes())
 
-        self.left_image_pub = self.create_publisher(Image, 'left/image_rect_color', 1)
-        self.left_camera_info_pub = self.create_publisher(CameraInfo, 'left/camera_info', 1)
-        self.right_camera_info_pub = self.create_publisher(CameraInfo, 'right/camera_info', 1)
-        self.disparity_image_pub = self.create_publisher(DisparityImage, 'disparity', 1)
+        qos_info = rclpy.qos.QoSProfile(
+          depth=1,
+          durability=rclpy.qos.QoSDurabilityPolicy.TRANSIENT_LOCAL,
+          reliability=rclpy.qos.QoSReliabilityPolicy.RELIABLE)
+
+        self.left_image_pub = self.create_publisher(Image, 'left/image_rect_color',
+                                                    rclpy.qos.qos_profile_sensor_data)
+        self.left_camera_info_pub = self.create_publisher(CameraInfo, 'left/camera_info',
+                                                          qos_info)
+        self.right_camera_info_pub = self.create_publisher(CameraInfo, 'right/camera_info',
+                                                           qos_info)
+        self.disparity_image_pub = self.create_publisher(DisparityImage, 'disparity',
+                                                         rclpy.qos.qos_profile_sensor_data)
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
     def _create_image_and_info_messages(self, image):

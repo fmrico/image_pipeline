@@ -129,7 +129,8 @@ PointCloudNode::PointCloudNode(const rclcpp::NodeOptions & options)
       std::bind(&PointCloudNode::imageCb, this, _1, _2, _3, _4));
   }
 
-  pub_points2_ = create_publisher<sensor_msgs::msg::PointCloud2>("points2", 1);
+  pub_points2_ =
+    create_publisher<sensor_msgs::msg::PointCloud2>("points2", rclcpp::SensorDataQoS());
 
   // TODO(jacobperron): Replace this with a graph event.
   //                    Only subscribe if there's a subscription listening to our publisher.
@@ -143,14 +144,14 @@ void PointCloudNode::connectCb()
   image_transport::TransportHints hints(this, "raw");
   const bool use_system_default_qos = this->get_parameter("use_system_default_qos").as_bool();
   rclcpp::QoS image_sub_qos = rclcpp::SensorDataQoS();
+  rclcpp::QoS info_sub_qos = rclcpp::QoS(100).transient_local();
   if (use_system_default_qos) {
     image_sub_qos = rclcpp::SystemDefaultsQoS();
   }
-  const auto image_sub_rmw_qos = image_sub_qos.get_rmw_qos_profile();
-  sub_l_image_.subscribe(this, "left/image_rect_color", hints.getTransport(), image_sub_rmw_qos);
-  sub_l_info_.subscribe(this, "left/camera_info", image_sub_rmw_qos);
-  sub_r_info_.subscribe(this, "right/camera_info", image_sub_rmw_qos);
-  sub_disparity_.subscribe(this, "disparity", image_sub_rmw_qos);
+  sub_l_image_.subscribe(this, "left/image_rect_color", hints.getTransport(), image_sub_qos);
+  sub_l_info_.subscribe(this, "left/camera_info", info_sub_qos);
+  sub_r_info_.subscribe(this, "right/camera_info", info_sub_qos);
+  sub_disparity_.subscribe(this, "disparity", image_sub_qos);
 }
 
 inline bool isValidPoint(const cv::Vec3f & pt)
